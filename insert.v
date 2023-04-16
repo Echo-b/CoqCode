@@ -3,18 +3,11 @@ Require Import Arith.
 Require Import List. 
 Import ListNotations.
 
-
 Fixpoint insert (i : nat) (l : list nat) :=
   match l with
   | nil => i::nil
   | h::t => if i <=? h
     then i::h::t else h::insert i t
-  end.
-
-Fixpoint sort (l : list nat) :=
-  match l with
-  | nil => nil
-  | h::t => insert h (sort t)
   end.
 
 Inductive sort_op : list nat -> list nat-> Prop := 
@@ -76,18 +69,7 @@ Proof.
              apply H0. apply H.
 Qed.
 
-Lemma sort_sorted: forall l, sorted (sort l).
-Proof.
-  intros l.
-  induction l.
-  - 
-    simpl. apply sorted_nil.
-  - 
-    simpl. apply insert_sorted. apply IHl.
-Qed.
-
-
-Lemma sort_sorted' :
+Theorem sort_sorted:
   forall l l', sort_ops l l' -> sorted  l'.
 Proof.
   introv H.
@@ -97,65 +79,3 @@ Proof.
     + apply IHsort_ops.
     + destruct l'. 
 Qed.
-
-Inductive Permutation : list nat -> list nat -> Prop :=
-  | perm_nil : Permutation [] []
-  | perm_self l: Permutation l l
-  | perm_skip x l l': Permutation l l' -> Permutation(x::l)(x::l')
-  | perm_swap x y l : Permutation (y::x::l)(x::y::l)
-  | perm_trans l l' l'' : Permutation l l'' -> Permutation l'' l' -> Permutation l l'.
-
-Lemma insert_perm:
-  forall x l, Permutation(x::l)(insert x l).
-Proof.
-  intros.
-  induction l as [|x' l'].
-  - simpl. apply perm_self.
-  - destruct (x <=? x') eqn:Hx.
-    + simpl. rewrite Hx. apply perm_self.
-    + simpl. rewrite Hx. 
-      assert (H' : Permutation (x::x'::l') (x'::x::l')).
-      apply perm_swap. apply perm_trans with (x'::x::l').
-      -- apply H'.
-      -- apply perm_skip. apply IHl'.
-Qed.
-
-
-Require Import Classical_Prop.
-
-Lemma  sort_perm': 
-  forall l l', sort' l l' -> Permutation l l'.
-Proof.
-  intros.
-  induction H.
-  - apply perm_self.
-  - induction l.
-    ++ simpl 
-  
-Qed.
-
-
-Lemma sort_perm :
-  forall l, Permutation l (sort l).
-Proof.
-  intros l.
-  induction l.
-  - simpl. apply perm_nil.
-  - simpl. apply (@perm_skip a _ _) in IHl.
-    apply perm_trans with (a::sort l).
-    + simpl. auto.
-    + apply insert_perm.
-Qed. 
-
-
-Definition sorting_algorithm (f : list nat -> list nat) :=
-  forall l, Permutation l (f l)  /\ sorted (f l).
-
-
-Theorem insertion_sort_correct: sorting_algorithm sort.
-Proof.
-  split. 
-  - apply sort_perm.
-  - apply sort_sorted.
-Qed.
-
