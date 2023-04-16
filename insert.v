@@ -1,5 +1,4 @@
 Require Import Arith.
-
 Require Import List. 
 Import ListNotations.
 
@@ -10,13 +9,18 @@ Fixpoint insert (i : nat) (l : list nat) :=
     then i::h::t else h::insert i t
   end.
 
-Inductive sort_op : list nat -> list nat-> Prop := 
-  | empty : sort_op [] []
-  | Step a::l: sort_op l (insert a l).
+Fixpoint sort (l : list nat) :=
+  match l with
+  | nil => nil
+  | h::t => insert h (sort t)
+  end.
 
-Inductive sort_ops : list nat -> list nat -> Prop :=
-  | Empty : sort_ops [] []
-  | kStep l l' l'': sort_ops l l'' -> sort_op l'' l' -> sort_ops l l'.
+Inductive sort_op : nat -> list nat -> list nat-> Prop := 
+  Step a l : sort_op a l (insert a l).
+
+Inductive sort_ops : nat -> list nat -> list nat -> Prop :=
+  | Empty a: sort_ops a [] [a]
+  | kStep a l l' l'': sort_ops a l l'' -> sort_op a l'' l' -> sort_ops a l l'.
   
 Inductive sorted : list nat -> Prop :=
   | sorted_nil : sorted nil
@@ -70,12 +74,11 @@ Proof.
 Qed.
 
 Theorem sort_sorted:
-  forall l l', sort_ops l l' -> sorted  l'.
+  forall a l l', sort_ops a l l' -> sorted  l'.
 Proof.
   introv H.
   induction H.
-  - simpl. apply sorted_nil.
+  - simpl. apply sorted_one.
   - induction H0.
-    + apply IHsort_ops.
-    + destruct l'. 
+  simpl. apply insert_sorted. apply IHsort_ops.
 Qed.
