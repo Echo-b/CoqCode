@@ -53,7 +53,7 @@ Qed.
 Lemma insert_sorted: 
   forall a l, sorted l -> sorted (insert a l).
 Proof.
-  intros a l H.
+  introv H.
   induction l as [| a' l'].
   -
     simpl. apply sorted_one.
@@ -79,6 +79,6 @@ Proof.
   introv H.
   induction H.
   - simpl. apply sorted_one.
-  - induction H0.
-  simpl. apply insert_sorted. apply IHsort_ops.
+  - inversion H0.
+  apply insert_sorted. apply IHsort_ops.
 Qed.
