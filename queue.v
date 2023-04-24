@@ -61,20 +61,27 @@ Proof.
   induction ens1.
   intros.
   destruct ens2.
-  simpl in H. inverts H. split; auto.
-  simpl in H.
-  inverts H.
-  destruct ens2; inverts H2.
-  introv Heq.
-  destruct ens2.
-  simpl in Heq.
-  inverts Heq.
-  destruct ens1. simpl in H1. inverts H1. simpl in H1. inverts H1.
-  simpl in Heq.
-  inverts Heq.
-  apply IHens1 in H1.
-  destruct H1. subst.
-  split; auto. 
+  simpl in H. inverts H.
+  - 
+    split; auto.
+  - 
+    simpl in H. inverts H.
+    destruct ens2; inverts H2.
+    (* inversion H.
+    destruct ens2.
+      + inverts H2.
+      + inverts H2. *)
+  - 
+    introv Heq.
+    destruct ens2.
+    simpl in Heq.
+    inverts Heq.
+    destruct ens1. simpl in H1. inverts H1. simpl in H1. inverts H1.
+    simpl in Heq.
+    inverts Heq.
+    apply IHens1 in H1.
+    destruct H1. subst.
+    split; auto. 
 Qed.   
 
 Lemma lbs_eq_decomp: 
@@ -115,8 +122,8 @@ Lemma fifo_empty:
   unfolds.
   introv H0 Hnth1 Hnth2.
   destruct i1.
-  simpl in Hnth1. inverts Hnth1.
-  simpl in Hnth1. inverts Hnth1.
+  simpl in Hnth1. discriminate. 
+  simpl in Hnth1. discriminate.
 Qed.
 
 Lemma inc_empty:
@@ -124,8 +131,8 @@ Lemma inc_empty:
   unfolds.
   introv Hnth1 Hnth2.
   destruct i1.
-  simpl in Hnth1. inverts Hnth1.
-  simpl in Hnth1. inverts Hnth1.
+  simpl in Hnth1. discriminate.
+  simpl in Hnth1. discriminate.
 Qed.
 
 Lemma inc_suffix:
@@ -134,7 +141,6 @@ Proof.
   introv Hinc Hlt.
   unfold INC in *.
   introv Hnth1 Hnth2.
-  (*???*)
   eapply Hinc with (i1:=S i1) (i2:=S i2); eauto.
   auto with arith.
 Qed.   
@@ -149,49 +155,52 @@ Lemma lbs_ub:
 Proof.
   introv H.
   induction H.
-  split; intros.
-  destruct i; simpl in H; inverts H.
-  destruct j; simpl in H; inverts H. 
 
-  destruct IHque_ops.
-  split.
-  introv Hd. eapply H1 in Hd. auto with arith.
-  inverts H0.
-  introv Hnth.
-  assert (Hor: j < length ens'' \/ ~ (j < length ens'')) by tauto.
-  destruct Hor.
-  rewrite nth_error_app1 in Hnth; auto.
-  eapply H2 in Hnth. auto with arith.
-  apply not_lt in H0.
-  rewrite nth_error_app2 in Hnth.
-  2: { auto with arith. }
-  destruct (j - length ens''). simpl in Hnth. inverts Hnth. auto with arith.
-  simpl in Hnth.
-  destruct n; simpl in Hnth; inverts Hnth.
+  - 
+    split; intros.
+    destruct i; simpl in H; inverts H.
+    destruct j; simpl in H; inverts H. 
+  -
+    destruct IHque_ops.
+    split.
+    introv Hd. eapply H1 in Hd. auto with arith.
+    inverts H0.
+    introv Hnth.
+    assert (Hor: j < length ens'' \/ ~ (j < length ens'')) by tauto.
+    destruct Hor.
+    rewrite nth_error_app1 in Hnth; auto.
+    eapply H2 in Hnth. auto with arith.
+    apply not_lt in H0.
+    rewrite nth_error_app2 in Hnth.
+    2: { auto with arith. }
+    destruct (j - length ens''). simpl in Hnth. inverts Hnth. auto with arith.
+    simpl in Hnth.
+    destruct n; simpl in Hnth; inverts Hnth.
 
   (* 3rd case in inductive def of que_ops *)  
-  destruct IHque_ops.
-  split.
-  introv Hd. 
-  assert (Hor: i < length lbs \/ ~ (i < length lbs)) by tauto.  
-  destruct Hor.
-  rewrite nth_error_app1 in Hd; auto.
-  eapply H1; eauto.
-  apply not_lt in H3.
-  rewrite nth_error_app2 in Hd.
-  2: { auto with arith. }
-  destruct (i - length lbs). simpl in Hd. inverts Hd. 
-  inverts H0.
-  specialize (H2 0 m t).
-  simpl in H2.
-  apply H2; auto.
-  simpl in Hd. destruct n; simpl in Hd; inverts Hd.
+  - 
+    destruct IHque_ops.
+    split.
+    introv Hd. 
+    assert (Hor: i < length lbs \/ ~ (i < length lbs)) by tauto.  
+    destruct Hor.
+    rewrite nth_error_app1 in Hd; auto.
+    eapply H1; eauto.
+    apply not_lt in H3.
+    rewrite nth_error_app2 in Hd.
+    2: { auto with arith. }
+    destruct (i - length lbs). simpl in Hd. inverts Hd. 
+    inverts H0.
+    specialize (H2 0 m t).
+    simpl in H2.
+    apply H2; auto.
+    simpl in Hd. destruct n; simpl in Hd; inverts Hd.
 
-  inverts H0.
-  introv H_.
-  specialize (H2 (S j) m t).
-  simpl in H2.
-  apply H2; auto.
+    inverts H0.
+    introv H_.
+    specialize (H2 (S j) m t).
+    simpl in H2.
+    apply H2; auto.
 Qed.
 
 Lemma inc_extend_preserve:
@@ -246,6 +255,8 @@ Proof.
   do 2 eexists; eauto. 
 Qed. 
 
+
+  
 Lemma fifo_ext_holds: 
   forall ens ens' lbs k, 
     que_ops ens ens' lbs k -> FIFO_ext lbs ens'. 
@@ -257,20 +268,21 @@ Proof.
     split. apply fifo_empty. split. apply inc_empty.
     introv Hnth1 Hnth2.
     destruct i.
-    simpl in Hnth1. inverts Hnth1.
-    simpl in Hnth1. inverts Hnth1.
+    simpl in Hnth1. discriminate.
+    simpl in Hnth1. discriminate.
 
   -
     unfold FIFO_ext in *.
     destruct IHque_ops.
     split; auto.
+    (* inversion H0. subst. *)
     inverts H0.
     destruct H2.
     split.
     assert (Hle:=H). 
     apply lbs_ub in Hle.
     destruct Hle as [Hle1 Hle2].
-    eapply inc_extend_preserve; eauto.
+    eapply inc_extend_preserve; eauto. 
 
     introv Hnth1 Hnth2.
     assert (Hj: j < length ens'' \/ ~(j < length ens'')) by tauto. 
@@ -359,5 +371,7 @@ Theorem fifo_queue:
     que_ops ens ens' lbs k -> FIFO lbs.
 Proof.
   intros.
-  eapply fifo_ext_holds; eauto. 
+  apply fifo_ext_holds in H.
+  apply fifo_weakening in H.
+  apply H.
 Qed. 
